@@ -142,6 +142,7 @@ module: {
 webpack.config.js的rules配置：
 
 ```
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module: {
     rules: [
       {
@@ -177,4 +178,246 @@ module: {
       }
     ]
   },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css'
+    })
+  ]
 ```
+
+## demo06
+此demo演示了optimize-css-assets-webpack-plugin和uglifyjs-webpack-plugin的配置,这两个插件的作用是在生产环境打包的时候，让对js和css文件进行压缩。
+webpack.config.js的rules配置：
+
+```
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
+ plugins: [
+    new OptimizeCssAssetsPlugin({})// 压缩css插件
+  ],
+  optimization: {
+    minimizer: [new UglifyJsPlugin()]// js压缩
+  }
+```
+
+## demo07
+此demo演示了html-webpack-plugin和clean-webpack-plugin的配置,html-webpack-plugin的作用是把打包的后的bundle.js自动注入到html模板中，clean-webpack-plugin是每次重新打包的时候，删除掉之前打包的文件。
+webpack.config.js的rules配置：
+
+```
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+ plugins: [
+ 	 new HtmlWebpackPlugin({ // Also generate a test.html
+      filename: 'index.html',
+      template: path.resolve(__dirname, 'index.html')
+    }),
+    new CleanWebpackPlugin('dist')
+ ]
+```
+
+## demo08
+此demo演示了file-loader,url-loader和image-webpack-loader的配置,file-loader,url-loader的作用是打包图片资源，image-webpack-loader是对图片进行压缩。其中url-loader还有一个作用，就是把图片转换成base64，所以一般图片打包，我们就用url-loader和image-webpack-loader就可以了。
+webpack.config.js的rules配置：
+
+```
+module：{
+rules: [
+ {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          // {
+          //     loader: 'file-loader',
+          //     options: {
+          //         name: '[path][name].[ext]'
+          //     },
+          // },
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+              name: '[path][name].[ext]'
+            }
+          },
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              mozjpeg: {
+                progressive: true,
+                quality: 65
+              },
+              // optipng.enabled: false will disable optipng
+              optipng: {
+                enabled: false
+              },
+              pngquant: {
+                quality: '65-90',
+                speed: 4
+              },
+              gifsicle: {
+                interlaced: false
+              },
+              // the webp option will enable WEBP
+              webp: {
+                quality: 75
+              }
+            }
+          }
+        ]
+      }
+]
+}
+```
+
+
+
+## demo09
+此demo演示了webpack-merge这个loader的作用。实际开发中，开发环境和生成环境的webpack配置文件是不一样的，但是又有很多共同的配置，所以可以抽取共同配置为webpack.common.js，而开发环境的可以编辑为webpack.dev.js，生产环境的可以编辑为webpack.prod.js。webpack-merge就是合并两个webpack配置文件的作用。
+webpack.dev.js的rules配置：
+
+```
+const merge = require('webpack-merge');
+const common = require('./webpack.common');
+
+module.exports = merge(common, devConfig);
+
+```
+
+## demo10
+此demo演示了webpack其他一些常用配置
+
+```
+devtool: 'inline-source-map', // 在开发阶段开启source-map，编译js调试
+
+resolve: {
+    alias: { // 配置别名
+      '@': path.resolve(__dirname, 'src/'),
+      'common': path.resolve(__dirname, 'src/common'),
+      'assets': path.resolve(__dirname, 'src/assets')
+    },
+    extensions: ['.js', '.vue', '.json'] // 默认值: [".js",".json"]  模块名字可以省略的后缀名
+  },
+
+  externals: { // 把一个模块做成外部依赖，不会打包到 js文件中。
+    jquery: 'jQuery',
+    lodash: '_'
+  },
+```
+
+另外，webpack-bundle-analyzer这个插件可以形象帮助分析webpack打包的文件组成，方便进行webpack配置优化
+
+```
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+plugins: [
+    new BundleAnalyzerPlugin()
+  ]
+
+```
+
+## demo11
+此demo展示webpack-dev-server的配置，启动一个web服务器，同时开启服务器代理，解决跨域问题。实时调试代码。这个插件也是在开发阶段才使用。
+webpack.dev.js配置：
+
+```
+const webpack = require('webpack');
+
+ devServer: {
+    contentBase: path.join(__dirname, 'dist'),
+    port: 8000, // 本地服务器端口号
+    hot: true, // 热重载
+    overlay: true, // 如果代码出错，会在浏览器页面弹出“浮动层”。类似于 vue-cli 等脚手架
+    proxy: {
+      // 跨域代理转发
+      '/comments': {
+        target: 'https://m.weibo.cn',
+        changeOrigin: true,
+        logLevel: 'debug',
+        headers: {
+          Cookie: ''
+        }
+      }
+    },
+    historyApiFallback: {
+      // HTML5 history模式
+      rewrites: [{ from: /.*/, to: '/index.html' }]
+    }
+  },
+ plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NamedModulesPlugin()
+  ]
+```
+
+## demo12
+此demo演示了babel-loader和eslint配置。babel-loader是编译ES6为浏览器可以运行的js；eslint是规范代码编写。
+
+新建eslintc.js编辑lint规则，eslintignore忽略lint的文件
+eslintc.js：
+
+```
+// .eslintrc.js
+// https://eslint.org/docs/user-guide/configuring
+module.exports = {
+  root: true,
+  parserOptions: {
+    parser: 'babel-eslint'
+  },
+  env: {
+    browser: true
+  },
+  extends: [
+    // https://github.com/standard/standard/blob/master/docs/RULES-en.md
+    'standard'
+  ],
+  globals: {
+    NODE_ENV: false
+  },
+  rules: {
+    // allow async-await
+    'generator-star-spacing': 'off',
+    // allow debugger during development
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    // 添加，分号必须
+    semi: ['error', 'always'],
+    'no-unexpected-multiline': 'off',
+    'space-before-function-paren': ['error', 'never'],
+    // 'quotes': ["error", "double", { "avoidEscape": true }]
+    quotes: [
+      'error',
+      'single',
+      {
+        avoidEscape: true
+      }
+    ]
+  }
+};
+```
+.eslintignore.js
+
+```
+/dist/
+/node_modules/
+/*.js
+```
+webpack.common.js
+
+```
+{
+        test: /\.(js|vue)$/,
+        loader: 'eslint-loader',
+        include: [resolve('src')],
+        options: {
+          fix: true
+        }
+      },
+```
+
+
+
+
+
+
+
