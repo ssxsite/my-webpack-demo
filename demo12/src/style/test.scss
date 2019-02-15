@@ -1,0 +1,12 @@
+$bgColor: #6affda;
+.test{
+  background-color: $bgColor;
+  display: flex;
+}
+.icon{
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  background: url("../assets/imgs/icon1.png")no-repeat;
+  background-size: cover;
+}

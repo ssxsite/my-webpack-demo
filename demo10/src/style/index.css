@@ -1,0 +1,6 @@
+.box {
+  color: blue;
+  font-size: 24px;
+  background: url("../assets/imgs/bg1.png")no-repeat;
+  background-size: cover;
+}
