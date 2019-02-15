@@ -27,7 +27,8 @@ $ git clone https://github.com/ssxdjq/my-webpack-demo.git
 
 # 四。demo介绍
 
-1.demo01
+## demo01
+
 webpack 默认配置文件是webpack.config.js，entry：打包入口文件，output：打包出口文件。
 按照demo01新建main.js:
 
@@ -50,6 +51,54 @@ cd demo01
 npx webpack
 
 编译打包完成后，用浏览器打开index.html,就可看到效果。
+
+## demo02
+运行方法与demo01一致。此demo添加了style-loader,css-loader帮助打包css文件，具体按照看readme
+webpack.config.js增加了rules配置：
+
+```
+ module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      }
+    ]
+  }
+```
+项目新增了index.css文件，main.js引入了css文件。此时打包出来的css文件是被style-loader以style的形式注入到html里面，所以我们看不到有css文件。
+
+## demo03
+此demo在demo02的基础上演示了sass-loader的配置，引入了test.scss文件。注意webpack.config.js的rules配置：
+
+```
+module: {
+    rules: [
+      {
+        test: /\.(sc|c|sa)ss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: 'sass-loader', // 将 Sass 编译成 CSS
+            options: {
+              sourceMap: true
+            }
+          }
+        ]
+      }
+    ]
+  }
+```
+先是写style-loader,再写css-loader,最后才写sass-loader,因为webpack的解析顺序是逆序的，先执行sass-loader,再执行css-loader,以此类推。
+sourceMap:true设置，帮助问快速找到css样式所在文件位置，方便调试。
+
+
 
 
 
