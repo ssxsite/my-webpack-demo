@@ -98,7 +98,83 @@ module: {
 先是写style-loader,再写css-loader,最后才写sass-loader,因为webpack的解析顺序是逆序的，先执行sass-loader,再执行css-loader,以此类推。
 sourceMap:true设置，帮助问快速找到css样式所在文件位置，方便调试。
 
+## demo04
+此demo演示了post-loader的配置，post-loader是一个框架，它实际没有什么作用，但是可以在此基础上，安装很多插件，比如autoprefixer，可以帮我们自动添加css浏览器前缀。
+webpack.config.js的rules配置：
+
+```
+module: {
+    rules: [
+      {
+        test: /\.(sc|c|sa)ss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              sourceMap: true,
+              plugins: (loader) => [require('autoprefixer')({ browsers: ['> 0.15% in CN'] })]
+            }
+          },
+          {
+            loader: 'sass-loader', // 将 Sass 编译成 CSS
+            options: {
+              sourceMap: true
+            }
+          }
+        ]
+      }
+    ]
+  }
+```
 
 
 
+## demo05
+此demo演示了mini-css-extract-pluginr的配置,这个插件的作用是在生产环境打包的时候，让js和css文件分别打包，从而可以让js和css文件同时解析，提高运行速度。用了这个就不要用style-loader了。
+webpack.config.js的rules配置：
 
+```
+module: {
+    rules: [
+      {
+        test: /\.(sc|c|sa)ss$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              ident: 'postcss',
+              sourceMap: true,
+              plugins: (loader) => [require('autoprefixer')({ browsers: ['> 0.15% in CN'] })]
+            }
+          },
+          {
+            loader: 'sass-loader', // 将 Sass 编译成 CSS
+            options: {
+              sourceMap: true
+            }
+          }
+        ]
+      }
+    ]
+  },
+```
